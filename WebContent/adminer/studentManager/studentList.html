@@ -1,0 +1,179 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>后台管理</title>
+<link rel="stylesheet" type="text/css" href="css/common.css" />
+<link rel="stylesheet" type="text/css" href="css/main.css" />
+<script type="text/javascript" src="js/libs/modernizr.min.js"></script>
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/tableExport.js"></script>
+</head>
+<body>
+	<div class="container clearfix">
+
+		<!--/sidebar-->
+		<div class="main-wrap">
+
+			<div class="crumb-wrap">
+				<div class="crumb-list">
+					<span class="crumb-name">通知管理</span>
+				</div>
+			</div>
+			<div class="search-wrap">
+				<div class="search-content">
+					<form  οnsubmit="return false">
+						<table class="search-tab">
+							<tr>
+								<th width="70">关键字:</th>
+								<input type="text" id="" name="" style="display: none;"/> 
+								<td><input class="common-text" placeholder="学号/职位/姓名"
+									name="keywords" value="" id="searchText" type="text"></td>
+								<td><input type="button" class="btn btn-primary btn2" id="btnSearch"
+									value="查询" ></input></td>
+							</tr>
+						</table>
+					</form>
+				</div>
+			</div>
+			<div class="result-wrap">
+				<form name="myform" id="myform" method="post">
+					<div class="result-title">
+						<div class="result-list">
+							
+							<a id="updateOrd" href="javascript:void(0)"><img
+								src="images/download.png" style="weight: 15px; height: 15px"></img>批量导出</a>
+						</div>
+					</div>
+					<div class="result-content">
+						<table class="result-tab" width="100%" id="table">
+						<tr>
+								<th class="tc" width="5%"><input class="allChoose" name="idNum"
+									type="checkbox" id="chooseAll"></th>
+								<th>学号</th>
+								<th>姓名</th>
+								<th>专业</th>
+								<th>班级</th>
+								<th>年龄</th>
+								<th>性别</th>
+								<th>职位</th>
+								<th>操作</th>
+							</tr>
+						</table>
+						<div class="list-page">
+							共<strong id="pageNum">0</strong>条
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+		<!--/main-->
+	</div>
+</body>
+<script type="text/javascript">
+$(function() {
+	 //从数据库中读取所有的通知 导入到表格中  
+	 //用json先替代
+	 var isCheckAll = false;
+	$('#table').on("click","#chooseAll",function(){
+		console.log(isCheckAll);
+		if (isCheckAll) {
+			$("input[name='idNum']").each(function() {
+				this.checked = false;
+			});
+			isCheckAll = false;
+		} else {
+			$("input[name='idNum']").each(function() {
+				this.checked = true;
+			});
+			isCheckAll = true;
+		}
+	})
+
+	function initTable(){
+		 $('#table').append("<tr> <th class='tc' width='5%'>"+
+				 "<input class='allChoose' name='idNum' type='checkbox' id='chooseAll' ></th>"+
+					"<th>学号</th>"+
+					"<th>姓名</th>"+
+					"<th>专业</th>"+
+					"<th>班级</th>"+
+					"<th>年龄</th>"+
+					"<th>性别</th>"+
+					"<th>职位</th>"+
+					"<th>操作</th>"+
+				"</tr>");
+	}
+	 $.ajax({
+		url: '/MyWebPlus/getNoticeInformation',
+		type: 'get',
+		dataType: 'text',
+		success: function(data) {
+			var notice=data.search();
+		}
+	})
+
+	
+	function search(text){
+		 var flag=false;
+		if(text==undefined){
+			flag=true;
+		}
+		 $.ajax({
+				url: '/MyWebPlus/getStudentInformation',
+				type: 'get',
+				dataType: 'text',
+				success: function(data) {
+			        var myObject = eval("("+data+")"); 
+			        
+			        var cnt=0;
+					for(var p in myObject){
+						if(flag||myObject[p].id.indexOf(text)!=-1||myObject[p].name.indexOf(text)!=-1
+								 ||myObject[p].position.indexOf(text)!=-1){
+							cnt++;
+							$('#table').append("<tr><td class='tc'><input name='idNum' value='59' type='checkbox'></td>" +
+				                    "<td>" + myObject[p].id + "</td> " +
+				                    "<td>" + myObject[p].name + "</td>" +
+				                    "<td>" + myObject[p].major + "</td>" +
+				                    "<td>" + myObject[p].classNum + "</td>" +
+				                    "<td>" + myObject[p].age + "</td>" +
+				                    "<td>" + myObject[p].sex + "</td>" +
+				                    "<td>" + myObject[p].position + "</td>" +
+				                    "<td>" +
+				                    "<a class='link-del' href='#'>叫来办公室 </a></td></tr>");
+								 $('#pageNum').text(cnt);
+						}
+						 
+					}
+				}
+			})
+	 }
+	 search();
+	 $('#searchText').keydown(function (event) {
+	        if (event.keyCode == 13) {
+	          $('#btnSearch').trigger('click');
+	        }
+	      });
+	$('#btnSearch').on("click",function(){
+		
+		var searchText=$('#searchText').val();
+		$('#table').empty();
+		initTable();
+    	search(searchText);
+		
+		
+	});
+	 
+	 $('#updateOrd').click(function() {
+         $('#table').tableExport({
+             type: 'excel',
+             escape: 'false',
+             fileName: "学生信息表",
+             // 导出数据去除第一列出现"on"
+             ignoreColumn: [0,8]
+
+         });
+     })
+
+});
+</script>
+</html>

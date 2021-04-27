@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>学生填写信息情况</title>
+<meta charset="UTF-8">
+<link href="css/bundled.css" rel="stylesheet" media="screen">
+<link rel="stylesheet" type="text/css" href="css/common.css" />
+<link rel="stylesheet" type="text/css" href="css/main.css" />
+
+<script type="text/javascript" src="js/jquery-1.8.3.min.js"></script>
+<link href="css/jquery-confirm.css" rel="stylesheet" media="screen">
+<script src="js/jquery-confirm.js" type="text/javascript"></script>
+<script type="text/javascript" src="js/tableExport.js"></script>
+</head>
+<body >
+	<div class="container clearfix">
+
+		<!--/sidebar-->
+		<div class="main-wrap">
+
+			<div class="crumb-wrap">
+				<div class="crumb-list">
+					<span class="crumb-name">填写信息</span>
+				</div>
+			</div>
+			<div class="result-wrap">
+				<form name="myform" id="myform" method="post">
+					<div class="result-title">
+						<div class="result-list">
+							
+							<a id="updateOrd" href="javascript:void(0)"><img
+								src="images/download.png" style="weight: 15px; height: 15px"></img>批量导出</a>
+						</div>
+					</div>
+					<div class="result-content">
+						<table class="result-tab" width="100%" id="tableList">
+						<tr>
+								
+								
+							</tr>
+						</table>
+						<div class="list-page">
+							共<strong id="pageNum">0</strong>条
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+		<!--/main-->
+	</div>
+	<script>
+		function getNow(s) {
+		    return s < 10 ? '0' + s: s;
+		}
+	
+		function getTime(){
+			var myDate = new Date();
+			//获取当前年
+			var year=myDate.getFullYear();
+			//获取当前月
+			var month=myDate.getMonth()+1;
+			//获取当前日
+			var date=myDate.getDate(); 
+			var h=myDate.getHours();       //获取当前小时数(0-23)
+			var m=myDate.getMinutes();     //获取当前分钟数(0-59)
+			var s=myDate.getSeconds();  
+	
+			var now=year+'年-'+getNow(month)+"月-"+getNow(date)+"日-"+getNow(h)+'时-'+getNow(m)+"分";
+			return now;
+		}
+		 function getName() {
+			 return getTime();
+	     }
+		 function getUrlParam(name) {
+			 var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+			 var r = window.location.search.substr(1).match(reg); //匹配目标参数
+			 if (r != null) return unescape(r[2]); return null; //返回参数值
+		}
+		 var noticeID=getUrlParam("noticeID");
+		var cnt=1;
+	     $(function() {
+	    	 $.ajax({
+					url: '/MyWebPlus/getStudentInformation',
+					type: 'get',
+					data:{"noticeID":noticeID},
+					dataType: 'text',
+					async :false,
+					success: function(data) {
+				        var myObject = eval("("+data+")"); 
+				        console.log(data)
+				        for(var i=0,l=myObject.length;i<l;i++){
+				        	var elemTile="<tr>";
+				        	var elemData="<tr>";
+				    	    for(var key in myObject[i]){
+				    	    	elemTile+="<th>"+key+"</th>";
+				    	    	elemData+="<th>"+myObject[i][key]+"</th>";
+				    	    	console.log(key+':'+myObject[i][key]);
+				    	    }
+				    	    elemTile+="</tr>";
+				    	    elemData+="</tr>";
+				    	    if(i==0){
+				    	    	$('#tableList').append(elemTile);
+				    	    }
+				    	    cnt++;
+				    	    $('#tableList').append(elemData);
+				    	 }
+				        $('#pageNum').text(cnt-1);
+					}
+				})
+	         $('#updateOrd').click(function() {
+	             $('#tableList').tableExport({
+	                 type: 'excel',
+	                 escape: 'false',
+	                 fileName: getName(),
+	             });
+	         })
+	
+	     })
+	</script>
+</body>
+</html>

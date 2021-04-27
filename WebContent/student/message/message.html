@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta http-equiv="content-type" content="text/html;charset=utf-8">
+<title>学生信息填写</title>
+<link href="css/info.css" rel="stylesheet" type="text/css">
+<link href="css/common.css" rel="stylesheet" type="text/css">
+<link href="css/index.css" rel="stylesheet" type="text/css">
+<link rel="shortcut icon" href="list.png" type="image/x-icon">
+<!-- JQuery压缩版 -->
+<script type="text/javascript" src="js/jquery-1.8.3.min.js"></script>
+</head>
+
+<body>
+	<!-- 引入 鼠标放在标签上 内容改变的js -->
+	<script src="js/jquery.SuperSlide.2.1.1.js"></script>
+	<script src="js/TouchSlide.1.1.js"></script>
+	<!-- 个人信息 -->
+	<div class="nav_menu w">
+		<div class="menu_item">
+			<div class="home">姓名</div>
+			<p class="web_home" id="name">网站首页</p>
+		</div>
+		<div class="menu_item">
+			<div class="home">学号</div>
+			<p class="web_home" id="ID">网站首页1</p>
+		</div>
+		<div class="menu_item">
+			<div class="home">专业</div>
+			<p class="web_home" id="major">网站首页2</p>
+		</div>
+		<div class="menu_item">
+			<div class="home">班级</div>
+			<p class="web_home" id="class">网站首页3</p>
+		</div>
+		<div class="menu_item">
+			<div class="home">年龄</div>
+			<p class="web_home" id="age">网站首页4</p>
+		</div>
+		<div class="menu_item">
+			<div class="home">性别</div>
+			<p class="web_home" id="sex">网站首页5</p>
+		</div>
+	</div>
+	<!-- 通知栏 -->
+	<div class="news">
+		<!-- 显示通知 -->
+		<div class="wrap clearfix">
+			<!-- 通知栏大标题 -->
+			<div>
+				<h1>通知栏</h1>
+			</div>
+			<!-- 通知的具体内容 -->
+			<div class="news-content clearfix">
+				<!-- 左边的整体通知 -->
+				<div class="news-left fl slideTxtBox">
+					<!-- 已完成和未完成的选择 -->
+					<div class="switch-bar hd">
+						<ul id="move-animate-left clearfix">
+							<li><a href="#">未完成</a></li>
+							<li><a href="#">已完成</a></li>
+						</ul>
+					</div>
+					<!-- 具体的通知标题 -->
+					<div class="tabcon " id="leftcon">
+                        <div class="subbox clearfix bd">
+                            <ul class="sublist" id="notDone">
+                                
+                            </ul>
+                            <ul class="sublist" id="done">
+                                
+                            </ul>
+                        </div>
+                    </div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+	<script src="js/index.js"></script>
+	<script>
+		$(function() {
+			//获取网页的参数
+			function getUrlParam(name) {
+				 var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+				 var r = window.location.search.substr(1).match(reg); //匹配目标参数
+				 if (r != null) return unescape(r[2]); return null; //返回参数值
+			}
+			var studentID = getUrlParam("id");
+			var state=getUrlParam("state");
+			var notice =getUrlParam("notice");
+	        notice=decodeURI(notice);
+			//获取已完成和未完成的通知  根据数据库中通知的状态来判断是否完成
+			$.ajax({
+				url: '/MyWebPlus/getNoticeInformation',
+				type: 'get',
+				data : {
+					"studentID" : studentID,
+					"state": 0,
+				},
+				dataType: 'text',
+				success: function(data) {
+			        var myObject = eval("("+data+")"); 
+					for(var p in myObject){
+						  console.log(myObject[p].title + " " + myObject[p].maker);
+	                	$('#notDone').append("<li><a href='../informationTable/table.html'  title='"+myObject[p].noticeID+"'> <span>"+
+	                			myObject[p].title+"</span></a><em>"+myObject[p].deadLine+"</em></li>");
+					}
+				}
+			})
+			//获取已完成的通知
+			 $.ajax({
+				url: '/MyWebPlus/getNoticeInformation',
+				type: 'get',
+				data : {
+					"studentID" : studentID,
+					"state": 1,
+				},
+				dataType: 'text',
+				success: function(data) {
+			        var myObject = eval("("+data+")"); 
+					for(var p in myObject){
+						  //console.log(myObject[p].title + " " + myObject[p].maker);
+	                	$('#done').append("<li><a href='../informationTable/table.html'  title='"+myObject[p].noticeID+"'> <span>"+
+	                			myObject[p].title+"</span></a><em>"+myObject[p].deadLine+"</em></li>");
+					}
+				}
+			})
+
+            //ajax获取数据库的信息   将学生的信息导入
+			$(".nav_menu").ready(function() {
+				$.ajax({
+					url : "/MyWebPlus/getStudentInformation",
+					data : {
+						"studentID" : studentID
+					},
+					dataType : "text",
+					success : function(data) {
+						var dataList = data.split(',');
+						$("#name").text(dataList[0].split(":")[1]);
+						$("#ID").text(dataList[1].split(":")[1]);
+						$("#major").text(dataList[2].split(":")[1]);
+						$("#class").text(dataList[3].split(":")[1]);
+						$("#age").text(dataList[5].split(":")[1]);
+						$("#sex").text(dataList[4].split(":")[1]);
+
+					}
+				});
+			});
+            //点击通知的时候转到通知的页面 添加要传递的通知ID和学生ID
+			$('#notDone').on("click"," li a",function() {
+				var value = $(this).attr("title");
+				//alert(value);
+				const origina=$(this).attr("href");
+				if(origina=='#'){
+					
+				}else{
+					//编码 不然汉字是乱码
+					value=encodeURI(encodeURI(value));
+					//把通知的ID和学生的ID传过去
+					$(this).attr("href", $(this).attr("href") + "?notice=" + value);
+					$(this).attr("href", $(this).attr("href") + "&id=" + studentID);
+				}
+				
+			});
+			$('#done').on("click"," li a",function() {
+				var value = $(this).attr("title");
+				//alert(value);
+				const origina=$(this).attr("href");
+				if(origina=='#'){
+					
+				}else{
+					//编码 不然汉字是乱码
+					value=encodeURI(encodeURI(value));
+					//把通知的ID和学生的ID传过去
+					$(this).attr("href", $(this).attr("href") + "?notice=" + value);
+					$(this).attr("href", $(this).attr("href") + "&id=" + studentID);
+				}
+				
+			});
+		})
+	</script>
+</body>
+
+</html>

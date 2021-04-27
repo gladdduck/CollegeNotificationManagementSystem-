@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta http-equiv="content-type" content="text/html;charset=utf-8">
+<title>学生信息填写</title>
+
+</head>
+
+<body>
+
+	<!-- 个人信息 -->
+	<div class="nav_menu w">
+		<div class="menu_item">
+			<div class="home">姓名</div>
+			<p class="web_home" id="name">网站首页</p>
+		</div>
+		<div class="menu_item">
+			<div class="home">学号</div>
+			<p class="web_home" id="ID">网站首页1</p>
+		</div>
+		<div class="menu_item">
+			<div class="home">专业</div>
+			<p class="web_home" id="major">网站首页2</p>
+		</div>
+		<div class="menu_item">
+			<div class="home">班级</div>
+			<p class="web_home" id="class">网站首页3</p>
+		</div>
+		<div class="menu_item">
+			<div class="home">年龄</div>
+			<p class="web_home" id="age">网站首页4</p>
+		</div>
+		<div class="menu_item">
+			<div class="home">性别</div>
+			<p class="web_home" id="sex">网站首页5</p>
+		</div>
+	</div>
+	<!-- 通知栏 -->
+	<div class="news">
+		<!-- 显示通知 -->
+		<div class="wrap clearfix">
+			<!-- 通知栏大标题 -->
+			<div>
+				<h1>通知栏</h1>
+			</div>
+			<!-- 通知的具体内容 -->
+			<div class="news-content clearfix">
+				<!-- 左边的整体通知 -->
+				<div class="news-left fl slideTxtBox">
+					<!-- 已完成和未完成的选择 -->
+					<div class="switch-bar hd">
+						<ul id="move-animate-left clearfix">
+							<li><a href="#">未完成</a></li>
+							<li><a href="#">已完成</a></li>
+						</ul>
+					</div>
+					<!-- 具体的通知标题 -->
+					<div class="tabcon " id="leftcon">
+                        <div class="subbox clearfix bd">
+                            <ul class="sublist" id="notDone">
+                                
+                            </ul>
+                            <ul class="sublist" id="done">
+                                
+                            </ul>
+                        </div>
+                    </div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+	
+	<script>
+		$(function() {
+			//获取已完成和未完成的通知  根据数据库中通知的状态来判断是否完成
+			//json数据获取 不是数据库
+			$.ajax({
+				url: '/MyWeb/getNoticeInformation',
+				type: 'get',
+				dataType: 'text',
+				success: function(data) {
+			        var myObject = eval("("+data+")"); 
+					for(var p in myObject){
+						  console.log(myObject[p].title + " " + myObject[p].maker);
+	                	$('#notDone').append("<li><a href='../informationTable/table.html' target='blank'> <span>"+
+	                			myObject[p].title+"</span></a><em>"+myObject[p].deadline+"</em></li>");
+	                
+	                
+					}
+				}
+			})
+			$.ajax({
+				url: 'noticeList.json',
+				type: 'get',
+				dataType: 'json',
+				success: function(data) {
+					var date = new Date();
+	            	var nowMonth = date.getMonth() + 1;
+	            	var strDate = date.getDate();
+	            	var seperator = "-";
+	            	if (nowMonth >= 1 && nowMonth <= 9) {
+	            	   nowMonth = "0" + nowMonth;
+	            	}
+	            	if (strDate >= 0 && strDate <= 9) {
+	            	   strDate = "0" + strDate;
+	            	}
+	            	var nowDate = date.getFullYear() + seperator + nowMonth + seperator + strDate;
+			        $.each(data, function(type, dict) {
+			            $.each(dict, function(i, item) {
+			                if(item["date"]>nowDate){
+			                	$('#notDone').append("<li><a href='../informationTable/table.html' target='blank'> <span>"+
+				                		item["title"]+"</span></a><em>"+item["date"]+"</em></li>");
+			                }else{
+			                	$('#done').append("<li><a href='../informationTable/table.html' target='blank'> <span>"+
+				                		item["title"]+"</span></a><em>"+item["date"]+"</em></li>");
+			                }
+			                
+			            });
+
+			        });
+				}
+			})
+			//获取页面转来的学生ID 
+			function getUrlParam(name) {
+				 var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+				 var r = window.location.search.substr(1).match(reg); //匹配目标参数
+				 if (r != null) return unescape(r[2]); return null; //返回参数值
+			}
+			var studnetID = getUrlParam("id");
+			var state=getUrlParam("state");
+			var notice =getUrlParam("notice");
+	        notice=decodeURI(notice);
+	        //如果是从通知页面转过来的 说明这个通知学生已经完成了  把她从未完成去除 加入完成中
+            var timeData;
+            if (notice != "null") {
+                $("#notDone li").live("each",function() {
+                	alert($(this).find("em").text());
+                    if ($(this).text().indexOf(notice) != -1) {
+                        timeData = $(this).find("em").text();
+                        
+                        $(this).remove();
+                    }
+                });
+                $("#done").prepend("<li><a href='../informationTable/table.html' target='blank'><span>" + notice + "</span></a><em>" + timeData + "</em></li>");
+
+            }
+            //ajax获取数据库的信息   将学生的信息导入
+			$(".nav_menu").ready(function() {
+				$.ajax({
+					url : "/MyWeb/getStudentInformation",
+					data : {
+						"studnetID" : studnetID
+					},
+					dataType : "text",
+					success : function(data) {
+						var dataList = data.split(',');
+						$("#name").text(dataList[0].split("=")[1]);
+						$("#ID").text(dataList[1].split("=")[1]);
+						$("#major").text(dataList[2].split("=")[1]);
+						$("#class").text(dataList[3].split("=")[1]);
+						$("#age").text(dataList[5].split("=")[1]);
+						$("#sex").text(dataList[4].split("=")[1]);
+
+					}
+				});
+			});
+            //点击通知的时候转到通知的页面  网页带上通知的标题
+			$('li a').live("click",function() {
+				var value = $(this).text();
+				const origina=$(this).attr("href");
+				//编码 不然汉字是乱码
+				value=encodeURI(encodeURI(value));
+				//判断点击的是已完成的还是未完成的
+				if(origina.indexOf('?')==-1){
+					$(this).attr("href", $(this).attr("href") + "?notice=" + value);
+					
+				}else if(origina.indexOf(value)==-1&&origina.indexOf('?')==-1){
+					$(this).attr("href", $(this).attr("href") + "?notice=" + value);
+					
+				}else if(origina.indexOf(value)==-1&&origina.indexOf('?')!=-1){
+					$(this).attr("href", $(this).attr("href") + "&notice=" + value);
+				}
+				$(this).attr("href", $(this).attr("href") + "&id=" + studnetID);
+			});
+		})
+	</script>
+</body>
+
+</html>

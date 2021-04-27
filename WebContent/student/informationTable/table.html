@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta http-equiv="content-type" content="text/html;charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<title>信息提交</title>
+<link rel="shortcut icon" href="isOK.png">
+
+
+<link href="css/style.css" rel="stylesheet" type="text/css">
+<link href="css/common.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+	<header>
+		<div class="left">
+			<h1>通知要求:</h1>
+			<h3 id="notice">这是发布的通知的要求</h3>
+			<form id="fieldForm" class="basic-grey">
+				<h1>
+					填写表单 <span>完成待填信息</span>
+				</h1>
+			</form>
+		</div>
+		<div class="right">
+			<input type="button" id="but" value="温馨提示" /> <a
+				style="color: #7C7C7C;">如果您在信息填写的过程中有任何疑问,请及时向班长或者相关老师联系!</a>
+		</div>
+	</header>
+
+</body>
+
+<script src="js/jquery-1.8.3.min.js"></script>
+<script src="js/froala_editor.min.js"></script>
+<script src="js/plugins/tables.min.js"></script>
+<script src="js/plugins/lists.min.js"></script>
+<script src="js/plugins/colors.min.js"></script>
+<script src="js/plugins/media_manager.min.js"></script>
+<script src="js/plugins/font_family.min.js"></script>
+<script src="js/plugins/font_size.min.js"></script>
+<script src="js/plugins/block_styles.min.js"></script>
+<script src="js/plugins/video.min.js"></script>
+<script type="text/javascript">
+	//获取url中的参数
+	function getUrlParam(name) {
+		var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+		var r = window.location.search.substr(1).match(reg); //匹配目标参数
+		if (r != null)
+			return unescape(r[2]);
+		return null; //返回参数值
+	}
+	$(function() {
+		var cnt=1;
+		var ID;
+		//获取从上级页面传来的参数 包括学生的ID 通知的ID
+		var studentID = getUrlParam("id");
+		var notice = getUrlParam("notice");
+		notice = decodeURI(notice);
+		console.log(studentID+notice);
+		$.ajax({
+			url : "/MyWebPlus/getNoticeInformation",
+			data : {
+				"studentID" : studentID,
+				"noticeID" : notice
+			},
+			dataType : "text",
+			async : false,
+			success : function(data) {
+				var myObject = eval("(" + data + ")");
+				console.log(data);
+				$.each(myObject,function(idx,item){  
+					$('#fieldForm').append("<label> <span>"+idx+" :</span> <input type='text' id='"+cnt+"' /> </label>");
+					if(1) {
+						 ID="#"+cnt;
+						if(item=="null"){
+							$(ID).val("");
+						}else{
+							$(ID).val(item);
+						}
+					}
+					cnt++;
+				})
+				$(ID).val(studentID);
+				$('#fieldForm').append("<label><span>&nbsp;</span> <input type='button' class='button' value='提交' id='submit' /> </label>")
+			}
+		});
+		
+		//显示通知的要求
+		$.ajax({
+			url : "/MyWebPlus/getNoticeInformation",
+			data : {
+				"noticeID" : notice
+			},
+			dataType : "text",
+			async : false,
+			success : function(data) {
+				var myObject = eval("(" + data + ")");
+				
+				for ( var p in myObject) {
+					$('#notice').text(myObject[p].claim);
+				}
+			}
+		});
+
+		//将学生填写的内容写入数据库
+		$('#submit').on("click",function() {
+			var values=[];
+			for(var i=1;i<cnt;i++){
+				var ID="#"+i;
+				values.push($(ID).val());
+				
+			}
+			console.log(values);
+			values = encodeURI(values);
+			$.ajax({
+				url : "/MyWebPlus/setNoticeInformation",
+				data : {
+					"studentID" : studentID,
+					"noticeID" : notice,
+					"value" : "1"
+				},
+				dataType : "text",
+				async : false,
+				success : function(data) {
+					if (data < 0) {
+						alert("提交失败,请重新提交!");
+						return ;
+					} else {
+						
+					}
+				}
+			});
+			$.ajax({
+				url : "/MyWebPlus/setNoticeInformation",
+				data : {
+					"values" : values,
+					"noticeID":notice
+				},
+				dataType : "text",
+				async : false,
+				success : function(data) {
+					if (data < 0) {
+						alert("提交失败,请重新提交!");
+						return ;
+					} else {
+						alert("提交成功");
+						window.location.href = "../message/message.html?id="
+								+ studentID
+								+ "&state=1&notice="
+								+ encodeURI(encodeURI(notice));
+					}
+				}
+			});
+		});
+
+	});
+</script>
+
+</html>

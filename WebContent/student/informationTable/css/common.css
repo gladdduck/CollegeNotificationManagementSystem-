@@ -1,0 +1,73 @@
+#preview {
+    margin-left: 40px;
+    width: 200px;
+    height: 200px;
+    border: 1px solid #E1E1E1;
+}
+
+#imghead {
+    filter: progid: DXImageTransform.Microsoft.AlphaImageLoader(sizingMethod=image);
+}
+
+header {
+    width: 100%;
+    border: 1px solid #e1e1e1;
+    margin: 0 auto;
+    background: #fff;
+}
+
+h3 {
+    margin: 60px;
+    color: #7c7c7c;
+}
+
+.left {
+    float: left;
+    width: 75%;
+    border-right: 1px dashed #ccc;
+}
+
+.right {
+    float: right;
+    width: 20%;
+    text-align: center;
+    border-radius: 14px;
+}
+
+.right a {
+    margin-top: 20px;
+    margin-right: 90px;
+    float: right;
+    width: 70%;
+    font-size: 18px;
+    letter-spacing: 3px;
+    padding: 2px;
+}
+
+#but {
+    float: right;
+    margin-top: 10px;
+    margin-right: 15%;
+    background: #7C7C7C;
+    color: #fff;
+    width: 150px;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    border-radius: 14px;
+}
+
+p {
+    height: 340px;
+    width: 500px;
+    color: #7C7C7C;
+}
+
+.hover {
+    background: #134364;
+    color: #fff;
+}
+
+.hover:hover {
+    background: #000;
+}

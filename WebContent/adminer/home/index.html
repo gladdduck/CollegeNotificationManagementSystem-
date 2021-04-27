@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>主页</title>
+    <link rel="stylesheet" href="css/style.min.css">
+    <link rel="shortcut icon" href="home.png" >
+</head>
+
+<body>
+    <div id="wrapper" class="wrapper">
+
+        <main>
+            <div class="container">
+                <iframe name="mainFrame1" style="width: 100%; height: 100%;" src="main.html"></iframe>
+            </div>
+        </main>
+    </div>
+    <!-- /wrapper -->
+
+    <button id="mm-menu-toggle" class="mm-menu-toggle">Toggle Menu</button>
+    <nav id="mm-menu" class="mm-menu">
+        <div class="mm-menu__header">
+        		<img style="position: absolute;top: 12px;right: 90px;" src="adminer.jpg" ></img>
+        		<h2 class="mm-menu__title" >管理员:</h2>
+            	<h2 class="mm-menu__title2" id="adminerID">xxx</h2>
+        </div>
+        <ul class="mm-menu__items">
+            <li class="mm-menu__item">
+                <a class="mm-menu__link" href="../studentManager/studentList.html" target="mainFrame1">
+                    <span class="mm-menu__link-text"><i class="md md-home"></i> 学生信息管理</span>
+                </a>
+            </li>
+            <li class="mm-menu__item">
+                <a class="mm-menu__link" href="../buildNotice/buildNotice.html" target="mainFrame1">
+                    <span class="mm-menu__link-text"><i class="md md-person"></i> 通知发布</span>
+                </a>
+            </li>
+            <li class="mm-menu__item">
+                <a class="mm-menu__link" href="../noticeList/noticeLists.html" target="mainFrame1">
+                    <span class="mm-menu__link-text"><i class="md md-settings"></i> 数据浏览</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+	
+    <script src="js/materialMenu.min.js"></script>
+    <script>
+    	//登录的时候把管理员的账号传过来  显示在菜单中
+        var menu = new Menu;
+        var url = document.location.href;
+	    var urlList = url.split('=');
+	    var AdminerID = urlList[urlList.length - 1].split('.')[0];
+	    //alert(AdminerID);
+	    document.getElementById("adminerID").innerHTML =AdminerID;
+        
+    </script>
+</body>
+
+</html>
